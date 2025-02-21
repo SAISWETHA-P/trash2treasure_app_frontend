@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import 'waste_selection_page.dart';  // Import the second page
+import 'waste_selection_page.dart';
+import 'bulk_waste_details_page.dart';
+import 'plastics_info_page.dart';
+import 'paper_info_page.dart';
+import 'ewaste_info_page.dart';
+import 'metals_info_page.dart';
+import 'organic_info_page.dart';
+import 'bio_info_pafe.dart';
+
 class RoleSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size; // Get screen size
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Choose Your Role"),
@@ -17,11 +27,12 @@ class RoleSelectionPage extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               "Select how you'll participate in making our environment cleaner",
               style: TextStyle(fontSize: 14, color: Colors.black),
+              textAlign: TextAlign.center, // Align text in the center
             ),
             SizedBox(height: 16),
             Row(
@@ -36,29 +47,87 @@ class RoleSelectionPage extends StatelessWidget {
                   },
                   child: RoleCard(icon: Icons.person, text: "Individual Consumer"),
                 ),
-                RoleCard(icon: Icons.apartment, text: "Bulk Waste Generator"),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BulkWasteDetailsPage()),
+                    );
+                  },
+                  child: RoleCard(icon: Icons.apartment, text: "Bulk Waste Generator"),
+                ),
               ],
             ),
             SizedBox(height: 24),
             Text(
               "Select Waste Categories for recycle informations",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center, // Align text in the center
             ),
             SizedBox(height: 16),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                childAspectRatio: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: [
-                  CategoryCard(icon: Icons.recycling, text: "Plastics"),
-                  CategoryCard(icon: Icons.description, text: "Paper"),
-                  CategoryCard(icon: Icons.memory, text: "E-Waste"),
-                  CategoryCard(icon: Icons.build, text: "Metals"),
-                  CategoryCard(icon: Icons.eco, text: "Organic Waste"),
-                  CategoryCard(icon: Icons.biotech, text: "Bio-Waste"),
-                ],
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: size.width > 600 ? 3 : 2, // Adjust columns dynamically
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                ),
+                itemCount: 6,
+                itemBuilder: (context, index) {
+                  final categories = [
+                    {"icon": Icons.recycling, "text": "Plastics"},
+                    {"icon": Icons.description, "text": "Paper"},
+                    {"icon": Icons.memory, "text": "E-Waste"},
+                    {"icon": Icons.build, "text": "Metals"},
+                    {"icon": Icons.eco, "text": "Organic Waste"},
+                    {"icon": Icons.biotech, "text": "Bio-Waste"},
+                  ];
+                  return GestureDetector(
+                    onTap: () {
+                      if (categories[index]['text'] == "Plastics") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => PlasticsInfoPage()),
+                        );
+                      }else if (categories[index]['text'] == "Paper") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => PaperInfoPage()),
+                        );
+                      }else if (categories[index]['text'] == "E-Waste") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EwasteInfoPage()),
+                        );
+                      }else if (categories[index]['text'] == "Metals") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MetalsInfoPage()),
+                        );
+                      }else if (categories[index]['text'] == "Organic Waste") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => OrganicInfoPage()),
+                        );
+                      }else if (categories[index]['text'] == "Bio-Waste") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BioInfoPage()),
+                        );
+                      } else {
+                        // Handle other categories or add logic for their respective pages
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${categories[index]['text']} page is not yet implemented')),
+                        );
+                      }
+                    },
+                    child: CategoryCard(
+                      icon: categories[index]['icon'] as IconData,
+                      text: categories[index]['text'] as String,
+                    ),
+                  );
+                },
               ),
             ),
           ],
