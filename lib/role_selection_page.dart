@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'waste_selection_page.dart';
-import 'bulk_waste_details_page.dart';
+import 'waste_category_identify.dart';
 import 'plastics_info_page.dart';
 import 'paper_info_page.dart';
 import 'ewaste_info_page.dart';
@@ -51,10 +51,10 @@ class RoleSelectionPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => BulkWasteDetailsPage()),
+                      MaterialPageRoute(builder: (context) => IdentifyWasteCategoryPage()),
                     );
                   },
-                  child: RoleCard(icon: Icons.apartment, text: "Bulk Waste Generator"),
+                  child: RoleCard(icon: Icons.apartment, text: "AI Waste Classifier"),
                 ),
               ],
             ),

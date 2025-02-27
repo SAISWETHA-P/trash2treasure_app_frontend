@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'industry_registration_page.dart';
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,12 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => IndustryRegistrationPage()),
+                    );
+                  },
                   child: Text('LOGIN AS INDUSTRY', style: TextStyle(color: Colors.white)),
                 ),
               ],
