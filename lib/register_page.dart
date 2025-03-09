@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -80,6 +81,26 @@ class RegisterPage extends StatelessWidget {
                   ),
                   onPressed: () {},
                   child: Text('Sign Up', style: TextStyle(color: Colors.white)),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FaIcon(FontAwesomeIcons.google, color: Colors.red), // Google Icon
+                      SizedBox(width: 10),
+                      Text('Continue with Google', style: TextStyle(color: Colors.black)),
+                    ],
+                  ),
                 ),
               ],
             ),

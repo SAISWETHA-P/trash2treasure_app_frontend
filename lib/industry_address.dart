@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'industry_confirm_order.dart';
 
 class CollectionAddressPage extends StatefulWidget {
+  final Map<String, double> selectedWaste;
+
+  CollectionAddressPage({required this.selectedWaste});
+
   @override
   _CollectionAddressPageState createState() => _CollectionAddressPageState();
 }
@@ -15,18 +21,17 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
   TextEditingController addressController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
-  // For date and time
   String _selectedDate = "Select Date";
   String _selectedTime = "Select Time";
 
-  // Fetch live location
   Future<void> _getLiveLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
+      String address =
+      await _getAddressFromLatLng(position.latitude, position.longitude);
       setState(() {
-        locationController.text =
-        "Lat: ${position.latitude}, Lng: ${position.longitude}";
+        locationController.text = address;
       });
     } catch (e) {
       setState(() {
@@ -35,12 +40,26 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
     }
   }
 
-  // Function to pick a date
+  Future<String> _getAddressFromLatLng(double lat, double lng) async {
+    final String apiKey = "AIzaSyAlwqAWnEvXQj3rW13FtGGr-OmRUnPydF8";
+    final String url =
+        "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey";
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data["status"] == "OK") {
+        return data["results"][0]["formatted_address"];
+      }
+    }
+    return "Address not found";
+  }
+
   Future<void> _pickDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2022),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
 
@@ -51,7 +70,6 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
     }
   }
 
-  // Function to pick a time
   Future<void> _pickTime() async {
     TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -69,23 +87,7 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                "Collection Address",
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.account_circle),
-              onPressed: () {
-                // Add navigation or function for the profile icon here
-
-              },
-            ),
-          ],
-        ),
+        title: Text("Collection Address"),
         backgroundColor: Colors.green,
       ),
       body: SingleChildScrollView(
@@ -93,174 +95,169 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Where should we collect your recyclables?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-
-            // Address Card
-            _buildCard(
-              title: "Collection Address",
-              icon: Icons.location_city,
-              child: Column(
-                children: [
-                  _buildTextField(
-                      controller: addressController, hint: "Street Address"),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                            controller: cityController, hint: "City"),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.location_city, color: Colors.green), // City icon added
+                        SizedBox(width: 8), // Space between icon and text
+                        Text(
+                          "Collection Address",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: addressController,
+                      decoration: InputDecoration(
+                        labelText: "Street Address",
+                        prefixIcon: Icon(Icons.home, color: Colors.green), // Added Icon
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: _buildTextField(
-                            controller: stateController, hint: "State"),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: cityController,
+                            decoration: InputDecoration(
+                              labelText: "City",
+                              prefixIcon: Icon(Icons.location_city, color: Colors.green), // Added Icon
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: stateController,
+                              decoration: InputDecoration(
+                                labelText: "State",
+                                prefixIcon: Icon(Icons.map, color: Colors.green), // Added Icon
+                              ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: zipCodeController,
+                      decoration: InputDecoration(
+                        labelText: "Zip Code",
+                        prefixIcon: Icon(Icons.pin_drop, color: Colors.green), // Added Icon
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  _buildTextField(
-                      controller: zipCodeController, hint: "Zip Code"),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 16),
-
-            // Date & Time Card
-            _buildCard(
-              title: "Pick Date & Time",
-              icon: Icons.calendar_today,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: Colors.green), // Icon added
+                        SizedBox(width: 8), // Space between icon and text
+                        Text(
+                          "Date and Time",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    ListTile(
+                      leading: Icon(Icons.calendar_today, color: Colors.green),
+                      title: Text(_selectedDate),
                       onTap: _pickDate,
-                      child: _buildPickerField(
-                          value: _selectedDate, icon: Icons.date_range),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
+                    ListTile(
+                      leading: Icon(Icons.access_time, color: Colors.green),
+                      title: Text(_selectedTime),
                       onTap: _pickTime,
-                      child: _buildPickerField(
-                          value: _selectedTime, icon: Icons.access_time),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 16),
-
-            // Live Location Card
-            _buildCard(
-              title: "Live Location",
-              icon: Icons.gps_fixed,
-              child: _buildTextField(
-                controller: locationController,
-                hint: "Tap to get location",
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.gps_fixed, color: Colors.green),
-                  onPressed: _getLiveLocation,
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.my_location, color: Colors.green), // Icon added
+                        SizedBox(width: 8), // Space between icon and text
+                        Text(
+                          "Live Location",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: locationController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Tap to get location",
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.gps_fixed, color: Colors.green),
+                          onPressed: _getLiveLocation,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             SizedBox(height: 30),
-
-            // Place Order Button
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => IndustryConfirmOrderPage()),
+                      builder: (context) => IndustryConfirmOrderPage(orderDetails: {
+                        "address": addressController.text,
+                        "city": cityController.text,
+                        "state": stateController.text,
+                        "zipCode": zipCodeController.text,
+                        "location": locationController.text,
+                        "date": _selectedDate,
+                        "time": _selectedTime,
+                        "selectedWaste": widget.selectedWaste,
+                      }),
+                    ),
                   );
                 },
-                child: Text(
-                  "Place Order",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                child: Text("Place Order", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCard(
-      {required String title, required IconData icon, required Widget child}) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.green),
-                SizedBox(width: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-      {required TextEditingController controller,
-        required String hint,
-        Widget? suffixIcon}) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hint,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        suffixIcon: suffixIcon,
-      ),
-    );
-  }
-
-  Widget _buildPickerField({required String value, required IconData icon}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.grey),
-          SizedBox(width: 8),
-          Text(
-            value,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
-          ),
-        ],
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'industry_details.dart';
 
 class IndustryRegistrationPage extends StatefulWidget {
@@ -13,24 +12,7 @@ class _IndustryRegistrationPageState extends State<IndustryRegistrationPage> {
   TextEditingController industryNameController = TextEditingController();
   TextEditingController industryAddressController = TextEditingController();
   TextEditingController registrationNumberController = TextEditingController();
-  TextEditingController locationController = TextEditingController();
   TextEditingController industryTypeController = TextEditingController();
-
-  // Fetch live location
-  Future<void> _getLiveLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        locationController.text =
-        "Lat: ${position.latitude}, Lng: ${position.longitude}";
-      });
-    } catch (e) {
-      setState(() {
-        locationController.text = "Unable to fetch location.";
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,18 +69,6 @@ class _IndustryRegistrationPageState extends State<IndustryRegistrationPage> {
                       controller: industryAddressController,
                       label: "Industry Address",
                       hint: "Enter your industry address",
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Live Location
-                    _buildTextField(
-                      controller: locationController,
-                      label: "Live Location",
-                      hint: "Tap to get location",
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.gps_fixed, color: Colors.green),
-                        onPressed: _getLiveLocation,
-                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -182,7 +152,6 @@ class _IndustryRegistrationPageState extends State<IndustryRegistrationPage> {
     required TextEditingController controller,
     required String label,
     required String hint,
-    Widget? suffixIcon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,7 +170,6 @@ class _IndustryRegistrationPageState extends State<IndustryRegistrationPage> {
             ),
             contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            suffixIcon: suffixIcon,
           ),
         ),
       ],

@@ -7,7 +7,14 @@ class IndustryWasteSelection extends StatefulWidget {
 }
 
 class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
-  // Stores switch states
+  // Stores selected waste types and their weights
+  Map<String, TextEditingController> wasteControllers = {
+    "Plastics": TextEditingController(),
+    "Paper": TextEditingController(),
+    "Metals": TextEditingController(),
+    "E-Waste": TextEditingController(),
+    "Bio-Waste": TextEditingController(),
+  };
   Map<String, bool> selectedWasteTypes = {
     "Plastics": false,
     "Paper": false,
@@ -30,10 +37,7 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
             ),
             IconButton(
               icon: Icon(Icons.account_circle),
-              onPressed: () {
-                // Add navigation or function for the profile icon here
-
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -56,6 +60,7 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
                     wasteType: wasteType,
                     icon: _getWasteIcon(wasteType),
                     isOn: selectedWasteTypes[wasteType]!,
+                    controller: wasteControllers[wasteType]!,
                     onChanged: (bool newValue) {
                       setState(() {
                         selectedWasteTypes[wasteType] = newValue;
@@ -69,25 +74,37 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  Map<String, double> selectedWasteWithWeights = {};
+                  selectedWasteTypes.forEach((key, value) {
+                    if (value && wasteControllers[key]!.text.isNotEmpty) {
+                      selectedWasteWithWeights[key] = double.tryParse(wasteControllers[key]!.text) ?? 0.0;
+                    }
+                  });
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => CollectionAddressPage()),
+                      builder: (context) => CollectionAddressPage(
+                        selectedWaste: selectedWasteWithWeights,
+                      ),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   elevation: 3,
                 ),
                 child: Text(
                   "Proceed",
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -97,7 +114,6 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
     );
   }
 
-  // Get icon based on waste type
   IconData _getWasteIcon(String wasteType) {
     switch (wasteType) {
       case "Plastics":
@@ -115,11 +131,11 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
     }
   }
 
-  // Waste Type Card Builder
   Widget _buildWasteTypeCard({
     required String wasteType,
     required IconData icon,
     required bool isOn,
+    required TextEditingController controller,
     required ValueChanged<bool> onChanged,
   }) {
     return Card(
@@ -141,20 +157,25 @@ class _IndustryWasteSelectionState extends State<IndustryWasteSelection> {
                     Text(
                       wasteType,
                       style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                     SizedBox(height: 8),
                     SizedBox(
                       width: 120,
                       child: TextField(
+                        controller: controller,
                         decoration: InputDecoration(
                           hintText: "Weight (Kg)",
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         keyboardType: TextInputType.number,
                       ),
