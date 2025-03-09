@@ -41,7 +41,7 @@ class _CollectionAddressPageState extends State<CollectionAddressPage> {
   }
 
   Future<String> _getAddressFromLatLng(double lat, double lng) async {
-    final String apiKey = "AIzaSyAlwqAWnEvXQj3rW13FtGGr-OmRUnPydF8";
+    final String apiKey = "YOUR GOOGLE API";
     final String url =
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey";
 

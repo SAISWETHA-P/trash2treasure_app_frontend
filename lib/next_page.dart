@@ -20,7 +20,7 @@ class _NextPageState extends State<NextPage> {
   TextEditingController zipController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
-  String apiKey = "AIzaSyAlwqAWnEvXQj3rW13FtGGr-OmRUnPydF8"; // Replace with your actual API key
+  String apiKey = "YOUR GOOGLE API "; // Replace with your actual API key
 
   Future<void> _getLiveLocation() async {
     try {
